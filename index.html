@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Personal Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .chat-container { width: 400px; margin: 0 auto; padding: 20px; background: #f0f0f0; border-radius: 8px; }
+        .chat-box { background: white; border-radius: 8px; padding: 10px; margin-bottom: 10px; max-height: 300px; overflow-y: auto; }
+        .input-box { width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <h1>AI Personal Assistant</h1>
+    <div class="chat-box" id="chat-box">
+        <!-- Chat messages will appear here -->
+    </div>
+    <input type="text" id="user-message" class="input-box" placeholder="Ask me anything...">
+    <button class="button" onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    function addMessage(message, isUser = true) {
+        const chatBox = document.getElementById('chat-box');
+        const newMessage = document.createElement('div');
+        newMessage.style.margin = "10px 0";
+        newMessage.style.padding = "10px";
+        newMessage.style.background = isUser ? "#e1f5fe" : "#fff3e0";
+        newMessage.style.borderRadius = "5px";
+        newMessage.innerText = message;
+        chatBox.appendChild(newMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+        const userMessage = document.getElementById('user-message').value;
+        if (!userMessage.trim()) return;
+
+        // Display user message
+        addMessage(userMessage);
+
+        // Send to Flask backend
+        fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `user_message=${encodeURIComponent(userMessage)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            addMessage(data.response, false);  // Display assistant's response
+            document.getElementById('user-message').value = '';  // Clear input field
+        });
+    }
+</script>
+
+</body>
+</html>
